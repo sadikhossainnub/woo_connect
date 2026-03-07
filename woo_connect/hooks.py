@@ -207,6 +207,15 @@ scheduler_events = {
 # before_request = ["woo_connect.utils.before_request"]
 # after_request = ["woo_connect.utils.after_request"]
 
+# CSRF Exemption for webhook endpoint
+override_whitelisted_methods = {
+	"woo_connect.woocommerce_connect.api.webhooks.handle_webhook": "woo_connect.woocommerce_connect.api.webhooks.handle_webhook"
+}
+
+csrf_exempt = [
+	"woo_connect.woocommerce_connect.api.webhooks.handle_webhook"
+]
+
 # Job Events
 # ----------
 # before_job = ["woo_connect.utils.before_job"]

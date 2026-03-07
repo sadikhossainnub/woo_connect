@@ -17,6 +17,9 @@ def handle_webhook():
 	Verifies the HMAC-SHA256 signature, then dispatches to the appropriate
 	sync handler based on the webhook topic.
 	"""
+	# Bypass CSRF validation — WooCommerce cannot provide a CSRF token
+	frappe.flags.ignore_csrf = True
+
 	settings = frappe.get_single("WooCommerce Server")
 	if not settings.enabled:
 		frappe.throw("WooCommerce integration is disabled", frappe.AuthenticationError)
@@ -50,13 +53,14 @@ def _verify_signature(payload, signature, secret):
 	if not secret or not signature:
 		return False
 
-	computed = hmac.new(
+	import base64
+
+	computed = hmac.HMAC(
 		secret.encode("utf-8"),
 		payload,
 		hashlib.sha256,
 	).digest()
 
-	import base64
 	computed_b64 = base64.b64encode(computed).decode("utf-8")
 
 	return hmac.compare_digest(computed_b64, signature)
