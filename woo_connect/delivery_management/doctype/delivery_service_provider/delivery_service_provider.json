@@ -1,0 +1,197 @@
+{
+    "actions": [],
+    "autoname": "field:provider_name",
+    "creation": "2026-03-08 00:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "provider_name",
+        "enabled",
+        "section_break_api",
+        "api_base_url",
+        "api_key",
+        "column_break_api",
+        "api_secret",
+        "section_break_supplier",
+        "supplier",
+        "company",
+        "section_break_accounts",
+        "cod_receivable_account",
+        "delivery_charge_account",
+        "column_break_accounts",
+        "settlement_payment_account",
+        "section_break_defaults",
+        "default_delivery_charge",
+        "section_break_contact",
+        "contact_person",
+        "phone",
+        "column_break_contact",
+        "email"
+    ],
+    "fields": [
+        {
+            "fieldname": "provider_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Provider Name",
+            "reqd": 1,
+            "unique": 1
+        },
+        {
+            "default": "1",
+            "fieldname": "enabled",
+            "fieldtype": "Check",
+            "label": "Enabled"
+        },
+        {
+            "fieldname": "section_break_api",
+            "fieldtype": "Section Break",
+            "label": "API Configuration"
+        },
+        {
+            "default": "https://portal.packzy.com/api/v1",
+            "fieldname": "api_base_url",
+            "fieldtype": "Data",
+            "label": "API Base URL",
+            "description": "Steadfast API: https://portal.packzy.com/api/v1"
+        },
+        {
+            "fieldname": "api_key",
+            "fieldtype": "Data",
+            "label": "API Key"
+        },
+        {
+            "fieldname": "column_break_api",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "api_secret",
+            "fieldtype": "Password",
+            "label": "API Secret Key"
+        },
+        {
+            "fieldname": "section_break_supplier",
+            "fieldtype": "Section Break",
+            "label": "Company & Supplier"
+        },
+        {
+            "fieldname": "supplier",
+            "fieldtype": "Link",
+            "label": "Supplier",
+            "options": "Supplier",
+            "description": "Link to Supplier for accounting"
+        },
+        {
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "label": "Company",
+            "options": "Company",
+            "reqd": 1
+        },
+        {
+            "fieldname": "section_break_accounts",
+            "fieldtype": "Section Break",
+            "label": "Accounts"
+        },
+        {
+            "fieldname": "cod_receivable_account",
+            "fieldtype": "Link",
+            "label": "COD Receivable Account",
+            "options": "Account",
+            "description": "Asset account for COD cash held by courier"
+        },
+        {
+            "fieldname": "delivery_charge_account",
+            "fieldtype": "Link",
+            "label": "Delivery Charge Account",
+            "options": "Account",
+            "description": "Expense account for courier delivery fees"
+        },
+        {
+            "fieldname": "column_break_accounts",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "settlement_payment_account",
+            "fieldtype": "Link",
+            "label": "Settlement Payment Account",
+            "options": "Account",
+            "description": "Bank/Cash account where settlement is received"
+        },
+        {
+            "fieldname": "section_break_defaults",
+            "fieldtype": "Section Break",
+            "label": "Defaults"
+        },
+        {
+            "default": "0",
+            "fieldname": "default_delivery_charge",
+            "fieldtype": "Currency",
+            "label": "Default Delivery Charge"
+        },
+        {
+            "fieldname": "section_break_contact",
+            "fieldtype": "Section Break",
+            "label": "Contact Information",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "contact_person",
+            "fieldtype": "Data",
+            "label": "Contact Person"
+        },
+        {
+            "fieldname": "phone",
+            "fieldtype": "Data",
+            "label": "Phone",
+            "options": "Phone"
+        },
+        {
+            "fieldname": "column_break_contact",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "email",
+            "fieldtype": "Data",
+            "label": "Email",
+            "options": "Email"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2026-03-08 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Delivery Management",
+    "name": "Delivery Service Provider",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Accounts Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "creation",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

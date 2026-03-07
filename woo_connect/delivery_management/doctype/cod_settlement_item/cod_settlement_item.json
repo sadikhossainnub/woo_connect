@@ -1,0 +1,68 @@
+{
+    "actions": [],
+    "creation": "2026-03-08 00:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "delivery_parcel",
+        "sales_invoice",
+        "customer",
+        "cod_amount",
+        "delivery_charge",
+        "net_amount"
+    ],
+    "fields": [
+        {
+            "fieldname": "delivery_parcel",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Delivery Parcel",
+            "options": "Delivery Parcel"
+        },
+        {
+            "fieldname": "sales_invoice",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Sales Invoice",
+            "options": "Sales Invoice"
+        },
+        {
+            "fieldname": "customer",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Customer"
+        },
+        {
+            "fieldname": "cod_amount",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "COD Amount",
+            "reqd": 1
+        },
+        {
+            "fieldname": "delivery_charge",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Delivery Charge"
+        },
+        {
+            "fieldname": "net_amount",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Net Amount",
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 0,
+    "istable": 1,
+    "links": [],
+    "modified": "2026-03-08 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Delivery Management",
+    "name": "COD Settlement Item",
+    "owner": "Administrator",
+    "permissions": [],
+    "sort_field": "creation",
+    "sort_order": "DESC",
+    "states": []
+}

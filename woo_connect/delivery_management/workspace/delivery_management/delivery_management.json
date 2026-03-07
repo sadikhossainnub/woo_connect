@@ -1,0 +1,86 @@
+{
+    "charts": [],
+    "content": "",
+    "creation": "2026-03-08 00:00:00.000000",
+    "custom_blocks": [],
+    "doctype": "Workspace",
+    "for_user": "",
+    "hide_custom": 0,
+    "icon": "truck",
+    "idx": 0,
+    "is_hidden": 0,
+    "label": "Delivery Management",
+    "links": [
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Delivery Service Provider",
+            "link_count": 0,
+            "link_to": "Delivery Service Provider",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Delivery Parcel",
+            "link_count": 0,
+            "link_to": "Delivery Parcel",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "COD Settlement",
+            "link_count": 0,
+            "link_to": "COD Settlement",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        }
+    ],
+    "modified": "2026-03-08 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Delivery Management",
+    "name": "Delivery Management",
+    "owner": "Administrator",
+    "parent_page": "",
+    "public": 1,
+    "restrict_to_domain": "",
+    "roles": [],
+    "sequence_id": 31,
+    "shortcuts": [
+        {
+            "color": "Green",
+            "doc_view": "",
+            "label": "Delivery Service Provider",
+            "link_to": "Delivery Service Provider",
+            "type": "DocType"
+        },
+        {
+            "color": "Blue",
+            "doc_view": "List",
+            "label": "Delivery Parcels",
+            "link_to": "Delivery Parcel",
+            "type": "DocType"
+        },
+        {
+            "color": "Orange",
+            "doc_view": "List",
+            "label": "COD Settlements",
+            "link_to": "COD Settlement",
+            "type": "DocType"
+        },
+        {
+            "color": "Yellow",
+            "doc_view": "List",
+            "label": "Sales Invoices",
+            "link_to": "Sales Invoice",
+            "type": "DocType"
+        }
+    ],
+    "title": "Delivery Management"
+}

@@ -1,0 +1,256 @@
+{
+    "actions": [],
+    "autoname": "naming_series:",
+    "creation": "2026-03-08 00:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "naming_series",
+        "delivery_provider",
+        "sales_invoice",
+        "column_break_main",
+        "company",
+        "posting_date",
+        "section_break_customer",
+        "customer_name",
+        "customer_phone",
+        "column_break_customer",
+        "customer_address",
+        "section_break_delivery",
+        "cod_amount",
+        "delivery_charge",
+        "column_break_delivery",
+        "net_amount",
+        "weight",
+        "section_break_tracking",
+        "consignment_id",
+        "tracking_code",
+        "column_break_tracking",
+        "delivery_status",
+        "section_break_ref",
+        "woocommerce_order_id",
+        "note",
+        "amended_from"
+    ],
+    "fields": [
+        {
+            "default": "DP-.YYYY.-",
+            "fieldname": "naming_series",
+            "fieldtype": "Select",
+            "hidden": 1,
+            "label": "Naming Series",
+            "options": "DP-.YYYY.-",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "delivery_provider",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Delivery Provider",
+            "options": "Delivery Service Provider",
+            "reqd": 1
+        },
+        {
+            "fieldname": "sales_invoice",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Sales Invoice",
+            "options": "Sales Invoice"
+        },
+        {
+            "fieldname": "column_break_main",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "label": "Company",
+            "options": "Company",
+            "reqd": 1
+        },
+        {
+            "default": "Today",
+            "fieldname": "posting_date",
+            "fieldtype": "Date",
+            "label": "Posting Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "section_break_customer",
+            "fieldtype": "Section Break",
+            "label": "Customer Details"
+        },
+        {
+            "fieldname": "customer_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Customer Name",
+            "reqd": 1
+        },
+        {
+            "fieldname": "customer_phone",
+            "fieldtype": "Data",
+            "label": "Customer Phone",
+            "options": "Phone",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_customer",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "customer_address",
+            "fieldtype": "Small Text",
+            "label": "Delivery Address",
+            "reqd": 1
+        },
+        {
+            "fieldname": "section_break_delivery",
+            "fieldtype": "Section Break",
+            "label": "Amount Details"
+        },
+        {
+            "fieldname": "cod_amount",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "COD Amount",
+            "reqd": 1,
+            "description": "Cash to collect from customer"
+        },
+        {
+            "fieldname": "delivery_charge",
+            "fieldtype": "Currency",
+            "label": "Delivery Charge",
+            "description": "Courier fee"
+        },
+        {
+            "fieldname": "column_break_delivery",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "net_amount",
+            "fieldtype": "Currency",
+            "label": "Net Amount",
+            "read_only": 1,
+            "description": "COD Amount - Delivery Charge"
+        },
+        {
+            "default": "1",
+            "fieldname": "weight",
+            "fieldtype": "Float",
+            "label": "Weight (kg)"
+        },
+        {
+            "fieldname": "section_break_tracking",
+            "fieldtype": "Section Break",
+            "label": "Tracking"
+        },
+        {
+            "fieldname": "consignment_id",
+            "fieldtype": "Data",
+            "label": "Consignment ID",
+            "read_only": 1,
+            "description": "Auto-filled from Steadfast API"
+        },
+        {
+            "fieldname": "tracking_code",
+            "fieldtype": "Data",
+            "label": "Tracking Code",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_tracking",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "Pending",
+            "fieldname": "delivery_status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Delivery Status",
+            "options": "Pending\nIn Transit\nDelivered\nReturned\nPartial\nCancelled"
+        },
+        {
+            "fieldname": "section_break_ref",
+            "fieldtype": "Section Break",
+            "label": "Reference",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "woocommerce_order_id",
+            "fieldtype": "Data",
+            "label": "WooCommerce Order ID"
+        },
+        {
+            "fieldname": "note",
+            "fieldtype": "Small Text",
+            "label": "Note"
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "hidden": 1,
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Delivery Parcel",
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "is_submittable": 1,
+    "links": [],
+    "modified": "2026-03-08 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Delivery Management",
+    "name": "Delivery Parcel",
+    "naming_rule": "By \"Naming Series\" field",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "amend": 1,
+            "cancel": 1,
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "amend": 1,
+            "cancel": 1,
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Accounts Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Sales User",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "creation",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

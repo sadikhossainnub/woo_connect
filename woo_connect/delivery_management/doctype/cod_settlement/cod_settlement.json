@@ -1,0 +1,208 @@
+{
+    "actions": [],
+    "autoname": "naming_series:",
+    "creation": "2026-03-08 00:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "naming_series",
+        "delivery_provider",
+        "settlement_date",
+        "column_break_main",
+        "company",
+        "reference_number",
+        "section_break_period",
+        "period_from",
+        "column_break_period",
+        "period_to",
+        "section_break_items",
+        "items",
+        "section_break_totals",
+        "total_cod_collected",
+        "column_break_totals",
+        "total_delivery_charges",
+        "column_break_totals2",
+        "net_settlement_amount",
+        "section_break_accounting",
+        "journal_entry",
+        "amended_from"
+    ],
+    "fields": [
+        {
+            "default": "COD-SETTLE-.YYYY.-",
+            "fieldname": "naming_series",
+            "fieldtype": "Select",
+            "hidden": 1,
+            "label": "Naming Series",
+            "options": "COD-SETTLE-.YYYY.-"
+        },
+        {
+            "fieldname": "delivery_provider",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Delivery Provider",
+            "options": "Delivery Service Provider",
+            "reqd": 1
+        },
+        {
+            "default": "Today",
+            "fieldname": "settlement_date",
+            "fieldtype": "Date",
+            "in_list_view": 1,
+            "label": "Settlement Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_main",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "label": "Company",
+            "options": "Company",
+            "reqd": 1
+        },
+        {
+            "fieldname": "reference_number",
+            "fieldtype": "Data",
+            "label": "Reference / Transaction Number"
+        },
+        {
+            "fieldname": "section_break_period",
+            "fieldtype": "Section Break",
+            "label": "Settlement Period"
+        },
+        {
+            "fieldname": "period_from",
+            "fieldtype": "Date",
+            "label": "Period From",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_period",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "period_to",
+            "fieldtype": "Date",
+            "label": "Period To",
+            "reqd": 1
+        },
+        {
+            "fieldname": "section_break_items",
+            "fieldtype": "Section Break",
+            "label": "Settlement Items"
+        },
+        {
+            "fieldname": "items",
+            "fieldtype": "Table",
+            "label": "Items",
+            "options": "COD Settlement Item",
+            "reqd": 1
+        },
+        {
+            "fieldname": "section_break_totals",
+            "fieldtype": "Section Break",
+            "label": "Totals"
+        },
+        {
+            "fieldname": "total_cod_collected",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Total COD Collected",
+            "read_only": 1,
+            "bold": 1
+        },
+        {
+            "fieldname": "column_break_totals",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "total_delivery_charges",
+            "fieldtype": "Currency",
+            "label": "Total Delivery Charges",
+            "read_only": 1,
+            "bold": 1
+        },
+        {
+            "fieldname": "column_break_totals2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "net_settlement_amount",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Net Settlement Amount",
+            "read_only": 1,
+            "bold": 1,
+            "description": "Amount received in bank"
+        },
+        {
+            "fieldname": "section_break_accounting",
+            "fieldtype": "Section Break",
+            "label": "Accounting"
+        },
+        {
+            "fieldname": "journal_entry",
+            "fieldtype": "Link",
+            "label": "Journal Entry",
+            "options": "Journal Entry",
+            "read_only": 1
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "hidden": 1,
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "COD Settlement",
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "is_submittable": 1,
+    "links": [],
+    "modified": "2026-03-08 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Delivery Management",
+    "name": "COD Settlement",
+    "naming_rule": "By \"Naming Series\" field",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "amend": 1,
+            "cancel": 1,
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "amend": 1,
+            "cancel": 1,
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Accounts Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "creation",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

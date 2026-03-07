@@ -1,0 +1,42 @@
+[
+    {
+        "doctype": "Custom Field",
+        "module": "Delivery Management",
+        "name": "Sales Invoice-custom_delivery_provider",
+        "dt": "Sales Invoice",
+        "label": "Delivery Provider",
+        "fieldname": "custom_delivery_provider",
+        "fieldtype": "Link",
+        "insert_after": "custom_woocommerce_id",
+        "options": "Delivery Service Provider",
+        "read_only": 1,
+        "no_copy": 1,
+        "hidden": 0
+    },
+    {
+        "doctype": "Custom Field",
+        "module": "Delivery Management",
+        "name": "Sales Invoice-custom_tracking_number",
+        "dt": "Sales Invoice",
+        "label": "Tracking Number",
+        "fieldname": "custom_tracking_number",
+        "fieldtype": "Data",
+        "insert_after": "custom_delivery_provider",
+        "read_only": 1,
+        "no_copy": 1,
+        "hidden": 0
+    },
+    {
+        "doctype": "Custom Field",
+        "module": "Delivery Management",
+        "name": "Sales Invoice-custom_delivery_status",
+        "dt": "Sales Invoice",
+        "label": "Delivery Status",
+        "fieldname": "custom_delivery_status",
+        "fieldtype": "Data",
+        "insert_after": "custom_tracking_number",
+        "read_only": 1,
+        "no_copy": 1,
+        "hidden": 0
+    }
+]

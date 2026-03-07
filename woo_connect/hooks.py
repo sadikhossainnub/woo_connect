@@ -92,8 +92,15 @@ required_apps = ["frappe", "erpnext"]
 # Fixtures
 # --------
 fixtures = [
-	{"dt": "Custom Field", "filters": [["module", "=", "Woocommerce Connect"]]}
+	{"dt": "Custom Field", "filters": [["module", "=", "Woocommerce Connect"]]},
+	{"dt": "Custom Field", "filters": [["module", "=", "Delivery Management"]]},
 ]
+
+# Doctype JS
+# ----------
+doctype_js = {
+	"Sales Invoice": "delivery_management/client_scripts/sales_invoice.js",
+}
 
 # Uninstallation
 # ------------
