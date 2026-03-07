@@ -1,0 +1,323 @@
+{
+    "actions": [],
+    "creation": "2026-03-07 00:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "enabled",
+        "section_break_connection",
+        "woocommerce_url",
+        "api_key",
+        "column_break_conn",
+        "api_secret",
+        "verify_ssl",
+        "section_break_defaults",
+        "company",
+        "default_warehouse",
+        "default_price_list",
+        "column_break_defaults",
+        "default_uom",
+        "default_item_group",
+        "cost_center",
+        "section_break_accounts",
+        "tax_account",
+        "column_break_accounts",
+        "freight_account",
+        "section_break_sync",
+        "sync_items",
+        "sync_customers",
+        "sync_orders",
+        "column_break_sync",
+        "sync_invoices",
+        "sync_payments",
+        "sync_stock",
+        "sync_coupons",
+        "section_break_loyalty",
+        "enable_loyalty_points",
+        "loyalty_program",
+        "column_break_loyalty",
+        "default_discount_account",
+        "section_break_webhook",
+        "webhook_secret",
+        "section_break_tax_mappings",
+        "tax_mappings",
+        "section_break_payment_mappings",
+        "payment_method_mappings",
+        "section_break_warehouse_mappings",
+        "warehouse_mappings",
+        "section_break_coupon_mappings",
+        "coupon_mappings"
+    ],
+    "fields": [
+        {
+            "default": "0",
+            "fieldname": "enabled",
+            "fieldtype": "Check",
+            "label": "Enabled"
+        },
+        {
+            "fieldname": "section_break_connection",
+            "fieldtype": "Section Break",
+            "label": "WooCommerce Connection"
+        },
+        {
+            "fieldname": "woocommerce_url",
+            "fieldtype": "Data",
+            "label": "WooCommerce URL",
+            "options": "URL",
+            "reqd": 1,
+            "description": "e.g. https://yourstore.com"
+        },
+        {
+            "fieldname": "api_key",
+            "fieldtype": "Data",
+            "label": "API Key (Consumer Key)",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_conn",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "api_secret",
+            "fieldtype": "Password",
+            "label": "API Secret (Consumer Secret)",
+            "reqd": 1
+        },
+        {
+            "default": "1",
+            "fieldname": "verify_ssl",
+            "fieldtype": "Check",
+            "label": "Verify SSL"
+        },
+        {
+            "fieldname": "section_break_defaults",
+            "fieldtype": "Section Break",
+            "label": "Default Values"
+        },
+        {
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "label": "Company",
+            "options": "Company",
+            "reqd": 1
+        },
+        {
+            "fieldname": "default_warehouse",
+            "fieldtype": "Link",
+            "label": "Default Warehouse",
+            "options": "Warehouse",
+            "reqd": 1,
+            "description": "Default warehouse for WooCommerce operations"
+        },
+        {
+            "fieldname": "default_price_list",
+            "fieldtype": "Link",
+            "label": "Default Price List",
+            "options": "Price List"
+        },
+        {
+            "fieldname": "column_break_defaults",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "default_uom",
+            "fieldtype": "Link",
+            "label": "Default UOM",
+            "options": "UOM",
+            "default": "Nos"
+        },
+        {
+            "fieldname": "default_item_group",
+            "fieldtype": "Link",
+            "label": "Default Item Group",
+            "options": "Item Group"
+        },
+        {
+            "fieldname": "cost_center",
+            "fieldtype": "Link",
+            "label": "Cost Center",
+            "options": "Cost Center"
+        },
+        {
+            "fieldname": "section_break_accounts",
+            "fieldtype": "Section Break",
+            "label": "Accounts"
+        },
+        {
+            "fieldname": "tax_account",
+            "fieldtype": "Link",
+            "label": "Tax Account",
+            "options": "Account"
+        },
+        {
+            "fieldname": "column_break_accounts",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "freight_account",
+            "fieldtype": "Link",
+            "label": "Freight / Shipping Account",
+            "options": "Account"
+        },
+        {
+            "fieldname": "section_break_sync",
+            "fieldtype": "Section Break",
+            "label": "Sync Options"
+        },
+        {
+            "default": "1",
+            "fieldname": "sync_items",
+            "fieldtype": "Check",
+            "label": "Sync Items"
+        },
+        {
+            "default": "1",
+            "fieldname": "sync_customers",
+            "fieldtype": "Check",
+            "label": "Sync Customers"
+        },
+        {
+            "default": "1",
+            "fieldname": "sync_orders",
+            "fieldtype": "Check",
+            "label": "Sync Orders"
+        },
+        {
+            "fieldname": "column_break_sync",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "1",
+            "fieldname": "sync_invoices",
+            "fieldtype": "Check",
+            "label": "Sync Invoices"
+        },
+        {
+            "default": "1",
+            "fieldname": "sync_payments",
+            "fieldtype": "Check",
+            "label": "Sync Payments"
+        },
+        {
+            "default": "1",
+            "fieldname": "sync_stock",
+            "fieldtype": "Check",
+            "label": "Sync Stock"
+        },
+        {
+            "default": "0",
+            "fieldname": "sync_coupons",
+            "fieldtype": "Check",
+            "label": "Sync Coupons"
+        },
+        {
+            "fieldname": "section_break_loyalty",
+            "fieldtype": "Section Break",
+            "label": "Loyalty & Discounts"
+        },
+        {
+            "default": "0",
+            "fieldname": "enable_loyalty_points",
+            "fieldtype": "Check",
+            "label": "Enable Loyalty Points"
+        },
+        {
+            "fieldname": "loyalty_program",
+            "fieldtype": "Link",
+            "label": "Loyalty Program",
+            "options": "Loyalty Program",
+            "depends_on": "enable_loyalty_points"
+        },
+        {
+            "fieldname": "column_break_loyalty",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "default_discount_account",
+            "fieldtype": "Link",
+            "label": "Default Discount Account",
+            "options": "Account"
+        },
+        {
+            "fieldname": "section_break_webhook",
+            "fieldtype": "Section Break",
+            "label": "Webhook"
+        },
+        {
+            "fieldname": "webhook_secret",
+            "fieldtype": "Data",
+            "label": "Webhook Secret",
+            "read_only": 1,
+            "description": "Auto-generated. Use this secret when configuring webhooks in WooCommerce."
+        },
+        {
+            "fieldname": "section_break_tax_mappings",
+            "fieldtype": "Section Break",
+            "label": "Tax Mappings"
+        },
+        {
+            "fieldname": "tax_mappings",
+            "fieldtype": "Table",
+            "label": "Tax Mappings",
+            "options": "WC Tax Mapping"
+        },
+        {
+            "fieldname": "section_break_payment_mappings",
+            "fieldtype": "Section Break",
+            "label": "Payment Method Mappings"
+        },
+        {
+            "fieldname": "payment_method_mappings",
+            "fieldtype": "Table",
+            "label": "Payment Method Mappings",
+            "options": "WC Payment Method Mapping"
+        },
+        {
+            "fieldname": "section_break_warehouse_mappings",
+            "fieldtype": "Section Break",
+            "label": "Warehouse Mappings"
+        },
+        {
+            "fieldname": "warehouse_mappings",
+            "fieldtype": "Table",
+            "label": "Warehouse Mappings",
+            "options": "WC Warehouse Mapping"
+        },
+        {
+            "fieldname": "section_break_coupon_mappings",
+            "fieldtype": "Section Break",
+            "label": "Coupon Mappings"
+        },
+        {
+            "fieldname": "coupon_mappings",
+            "fieldtype": "Table",
+            "label": "Coupon Mappings",
+            "options": "WC Coupon Mapping"
+        }
+    ],
+    "index_web_pages_for_search": 0,
+    "issingle": 1,
+    "links": [],
+    "modified": "2026-03-07 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Woocommerce Connect",
+    "name": "WooCommerce Server",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "print": 1,
+            "read": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "creation",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

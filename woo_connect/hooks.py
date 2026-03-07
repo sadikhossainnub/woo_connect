@@ -9,6 +9,7 @@ app_license = "mit"
 # ------------------
 
 # required_apps = []
+required_apps = ["frappe", "erpnext"]
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -88,6 +89,12 @@ app_license = "mit"
 # before_install = "woo_connect.install.before_install"
 # after_install = "woo_connect.install.after_install"
 
+# Fixtures
+# --------
+fixtures = [
+	{"dt": "Custom Field", "filters": [["module", "=", "Woocommerce Connect"]]}
+]
+
 # Uninstallation
 # ------------
 
@@ -143,23 +150,20 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"woo_connect.tasks.all"
-# 	],
-# 	"daily": [
-# 		"woo_connect.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"woo_connect.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"woo_connect.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"woo_connect.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	"hourly_long": [
+		"woo_connect.woocommerce_connect.sync.item_sync.sync_items_from_woocommerce",
+		"woo_connect.woocommerce_connect.sync.customer_sync.sync_customers_from_woocommerce",
+		"woo_connect.woocommerce_connect.sync.order_sync.sync_orders_from_woocommerce",
+		"woo_connect.woocommerce_connect.sync.invoice_sync.sync_invoices_from_woocommerce",
+		"woo_connect.woocommerce_connect.sync.payment_sync.sync_payments_from_woocommerce",
+		"woo_connect.woocommerce_connect.sync.discount_sync.sync_coupons_from_woocommerce",
+		"woo_connect.woocommerce_connect.sync.loyalty_sync.sync_loyalty_points_from_woocommerce",
+	],
+	"daily": [
+		"woo_connect.woocommerce_connect.sync.stock_sync.sync_stock_to_woocommerce",
+	],
+}
 
 # Testing
 # -------
