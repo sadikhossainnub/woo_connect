@@ -122,7 +122,7 @@ def _create_or_update_item(product, settings):
 	else:
 		item = frappe.new_doc("Item")
 		item.item_code = product.get("sku") or f"WC-{wc_id}"
-		item.item_group = settings.default_item_group or "All Item Groups"
+		item.item_group = _resolve_item_group(product, settings)
 		item.stock_uom = settings.default_uom or "Nos"
 		item.is_stock_item = 1 if product.get("manage_stock") else 0
 
@@ -196,3 +196,112 @@ def _set_item_price(item_code, price, price_list):
 		item_price.price_list_rate = float(price)
 		item_price.flags.ignore_permissions = True
 		item_price.save()
+
+
+def _resolve_item_group(product, settings):
+	"""Resolve the ERPNext Item Group from WooCommerce product categories.
+
+	Uses the category mapping table in settings. Falls back to default_item_group.
+	"""
+	categories = product.get("categories", [])
+	if not categories:
+		return settings.default_item_group or "All Item Groups"
+
+	# Check category mappings
+	for wc_cat in categories:
+		wc_cat_id = str(wc_cat.get("id", ""))
+		for mapping in settings.category_mappings:
+			if mapping.wc_category_id == wc_cat_id:
+				return mapping.item_group
+
+	# If no mapping found, try to auto-create Item Group from first category name
+	if settings.sync_categories:
+		first_cat = categories[0]
+		cat_name = first_cat.get("name", "")
+		if cat_name and not frappe.db.exists("Item Group", cat_name):
+			ig = frappe.new_doc("Item Group")
+			ig.item_group_name = cat_name
+			ig.parent_item_group = settings.default_item_group or "All Item Groups"
+			ig.flags.ignore_permissions = True
+			ig.save()
+			frappe.db.commit()
+		if cat_name and frappe.db.exists("Item Group", cat_name):
+			return cat_name
+
+	return settings.default_item_group or "All Item Groups"
+
+
+def sync_categories_from_woocommerce():
+	"""Pull product categories from WooCommerce and create Item Groups + mappings."""
+	settings = frappe.get_single("WooCommerce Server")
+	if not settings.enabled or not settings.sync_categories:
+		return
+
+	wc_categories = get_all_wc_resources("products/categories")
+
+	for wc_cat in wc_categories:
+		try:
+			wc_cat_id = str(wc_cat.get("id"))
+			cat_name = wc_cat.get("name", "").strip()
+
+			if not cat_name or cat_name.lower() == "uncategorized":
+				continue
+
+			# Determine parent Item Group
+			parent_group = settings.default_item_group or "All Item Groups"
+			wc_parent_id = str(wc_cat.get("parent", 0))
+			if wc_parent_id and wc_parent_id != "0":
+				# Find parent mapping
+				for mapping in settings.category_mappings:
+					if mapping.wc_category_id == wc_parent_id:
+						parent_group = mapping.item_group
+						break
+
+			# Create Item Group if it doesn't exist
+			if not frappe.db.exists("Item Group", cat_name):
+				ig = frappe.new_doc("Item Group")
+				ig.item_group_name = cat_name
+				ig.parent_item_group = parent_group
+				ig.flags.ignore_permissions = True
+				ig.save()
+
+			# Add or update mapping in settings
+			existing_mapping = False
+			for mapping in settings.category_mappings:
+				if mapping.wc_category_id == wc_cat_id:
+					mapping.wc_category_name = cat_name
+					mapping.item_group = cat_name
+					existing_mapping = True
+					break
+
+			if not existing_mapping:
+				settings.append("category_mappings", {
+					"wc_category_id": wc_cat_id,
+					"wc_category_name": cat_name,
+					"item_group": cat_name,
+				})
+
+			create_sync_log(
+				sync_type="Item",
+				direction="Pull",
+				status="Success",
+				wc_id=wc_cat_id,
+				erpnext_doctype="Item Group",
+				erpnext_docname=cat_name,
+				message=f"Synced category: {cat_name}",
+			)
+		except Exception as e:
+			create_sync_log(
+				sync_type="Item",
+				direction="Pull",
+				status="Failed",
+				wc_id=wc_cat.get("id"),
+				message=str(e),
+			)
+			frappe.log_error(
+				title=f"WC Category Sync Error: {wc_cat.get('name')}",
+				message=frappe.get_traceback(),
+			)
+
+	settings.save(ignore_permissions=True)
+	frappe.db.commit()

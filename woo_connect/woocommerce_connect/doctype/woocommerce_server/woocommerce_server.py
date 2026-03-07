@@ -24,9 +24,13 @@ class WooCommerceServer(Document):
 		from woo_connect.woocommerce_connect.doctype.wc_warehouse_mapping.wc_warehouse_mapping import (
 			WCWarehouseMapping,
 		)
+		from woo_connect.woocommerce_connect.doctype.wc_category_mapping.wc_category_mapping import (
+			WCCategoryMapping,
+		)
 
 		api_key: DF.Data
 		api_secret: DF.Password
+		category_mappings: DF.Table[WCCategoryMapping]
 		company: DF.Link
 		cost_center: DF.Link | None
 		coupon_mappings: DF.Table[WCCouponMapping]
@@ -40,6 +44,7 @@ class WooCommerceServer(Document):
 		freight_account: DF.Link | None
 		loyalty_program: DF.Link | None
 		payment_method_mappings: DF.Table[WCPaymentMethodMapping]
+		sync_categories: DF.Check
 		sync_coupons: DF.Check
 		sync_customers: DF.Check
 		sync_invoices: DF.Check
@@ -134,3 +139,11 @@ class WooCommerceServer(Document):
 
 		frappe.enqueue(sync_coupons_from_woocommerce, queue="long", timeout=1500)
 		frappe.msgprint("Coupon sync has been queued.", indicator="blue", alert=True)
+
+	@frappe.whitelist()
+	def run_sync_categories(self):
+		"""Manually trigger category sync."""
+		from woo_connect.woocommerce_connect.sync.item_sync import sync_categories_from_woocommerce
+
+		frappe.enqueue(sync_categories_from_woocommerce, queue="long", timeout=1500)
+		frappe.msgprint("Category sync has been queued.", indicator="blue", alert=True)

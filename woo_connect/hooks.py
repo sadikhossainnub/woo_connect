@@ -159,6 +159,7 @@ scheduler_events = {
 		"woo_connect.woocommerce_connect.sync.payment_sync.sync_payments_from_woocommerce",
 		"woo_connect.woocommerce_connect.sync.discount_sync.sync_coupons_from_woocommerce",
 		"woo_connect.woocommerce_connect.sync.loyalty_sync.sync_loyalty_points_from_woocommerce",
+		"woo_connect.woocommerce_connect.sync.item_sync.sync_categories_from_woocommerce",
 	],
 	"daily": [
 		"woo_connect.woocommerce_connect.sync.stock_sync.sync_stock_to_woocommerce",

@@ -32,6 +32,7 @@
         "sync_payments",
         "sync_stock",
         "sync_coupons",
+        "sync_categories",
         "section_break_loyalty",
         "enable_loyalty_points",
         "loyalty_program",
@@ -46,7 +47,9 @@
         "section_break_warehouse_mappings",
         "warehouse_mappings",
         "section_break_coupon_mappings",
-        "coupon_mappings"
+        "coupon_mappings",
+        "section_break_category_mappings",
+        "category_mappings"
     ],
     "fields": [
         {
@@ -212,6 +215,13 @@
             "label": "Sync Coupons"
         },
         {
+            "default": "1",
+            "fieldname": "sync_categories",
+            "fieldtype": "Check",
+            "label": "Sync Categories",
+            "description": "Auto-create Item Groups from WooCommerce product categories"
+        },
+        {
             "fieldname": "section_break_loyalty",
             "fieldtype": "Section Break",
             "label": "Loyalty & Discounts"
@@ -294,6 +304,18 @@
             "fieldtype": "Table",
             "label": "Coupon Mappings",
             "options": "WC Coupon Mapping"
+        },
+        {
+            "fieldname": "section_break_category_mappings",
+            "fieldtype": "Section Break",
+            "label": "Category → Item Group Mappings"
+        },
+        {
+            "fieldname": "category_mappings",
+            "fieldtype": "Table",
+            "label": "Category Mappings",
+            "options": "WC Category Mapping",
+            "description": "Map WooCommerce product categories to ERPNext Item Groups. Unmapped categories use the Default Item Group."
         }
     ],
     "index_web_pages_for_search": 0,

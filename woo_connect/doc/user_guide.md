@@ -143,6 +143,24 @@ Map WooCommerce stock locations to ERPNext warehouses (if you have multiple loca
 | `Main Store` | Stores - MC |
 | `Warehouse B` | WH-B - MC |
 
+#### Category → Item Group Mappings
+
+Map WooCommerce product categories to ERPNext Item Groups. If **Sync Categories** is enabled, the connector will:
+
+1. Automatically pull all WooCommerce product categories
+2. Create corresponding **Item Groups** in ERPNext (respecting parent hierarchy)
+3. Populate the mapping table automatically
+
+You can also set up manual mappings:
+
+| WC Category ID | WC Category Name | Item Group |
+|---|---|---|
+| `15` | T-Shirts | T-Shirts |
+| `22` | Electronics | Electronic Items |
+| `30` | Books | Books & Media |
+
+> **Note:** Items without a mapped category will use the **Default Item Group** from the settings. When Sync Categories is on, unmapped categories are auto-created as Item Groups.
+
 ---
 
 ## 4. Syncing Data
@@ -169,6 +187,7 @@ On the **WooCommerce Server** form, click the **Sync** dropdown button to trigge
 - **Sync Invoices** — Create Sales Invoices for completed orders
 - **Sync Payments** — Create Payment Entries for paid orders
 - **Sync Coupons** — Pull coupon codes to ERPNext
+- **Sync Categories** — Auto sync categories to Item Groups
 
 Each sync runs as a **background job** so you can continue using ERPNext while it runs.
 
