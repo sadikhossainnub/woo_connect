@@ -17,11 +17,11 @@ def sync_addresses_from_woocommerce():
 
 	for order in orders:
 		try:
-			customer_name = frappe.db.get_value(
-				"Customer",
-				{"custom_woocommerce_id": str(order.get("customer_id"))},
-				"name",
-			)
+			email = order.get("billing", {}).get("email")
+			if not email:
+				continue
+				
+			customer_name = _get_customer_by_email(email)
 			if not customer_name:
 				continue
 
@@ -57,15 +57,30 @@ def sync_addresses_from_woocommerce():
 			)
 
 
+def _get_customer_by_email(email):
+	"""Find a customer by email through linked contacts."""
+	contacts = frappe.get_all("Contact", filters={"email_id": email}, fields=["name"])
+	for contact in contacts:
+		links = frappe.get_all("Dynamic Link", 
+			filters={"parent": contact.name, "link_doctype": "Customer"}, 
+			fields=["link_name"]
+		)
+		if links:
+			return links[0].link_name
+	return None
+
+
 def _sync_address(address_data, customer_name, address_type, wc_address_id):
 	"""Create or update an Address from WooCommerce order address data."""
-	existing = frappe.db.get_value("Address", {"custom_woocommerce_id": wc_address_id}, "name")
+	# Search by title which includes customer name and type
+	address_title = f"{customer_name}-{address_type}"
+	existing = frappe.db.get_value("Address", {"address_title": address_title}, "name")
 
 	if existing:
 		address = frappe.get_doc("Address", existing)
 	else:
 		address = frappe.new_doc("Address")
-		address.address_title = f"{customer_name}-{address_type}"
+		address.address_title = address_title
 		address.address_type = address_type
 
 	address.address_line1 = address_data.get("address_1", "")
@@ -76,7 +91,6 @@ def _sync_address(address_data, customer_name, address_type, wc_address_id):
 	address.country = _get_country(address_data.get("country", ""))
 	address.phone = address_data.get("phone", "")
 	address.email_id = address_data.get("email", "")
-	address.custom_woocommerce_id = wc_address_id
 
 	if not any(l.link_doctype == "Customer" and l.link_name == customer_name for l in address.links):
 		address.append("links", {"link_doctype": "Customer", "link_name": customer_name})

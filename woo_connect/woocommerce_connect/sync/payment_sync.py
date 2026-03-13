@@ -18,14 +18,20 @@ def sync_payments_from_woocommerce():
 	for wc_order in orders:
 		try:
 			wc_order_id = str(wc_order.get("id"))
+			wc_order_no = f"WC-{wc_order.get('number', wc_order_id)}"
 
-			# Check if Sales Invoice exists
-			si_name = frappe.db.get_value("Sales Invoice", {"custom_woocommerce_id": wc_order_id}, "name")
+			# Find Sales Order by PO No
+			so_name = frappe.db.get_value("Sales Order", {"po_no": wc_order_no}, "name")
+			if not so_name:
+				continue
+
+			# Find Sales Invoice linked to this Sales Order
+			si_name = frappe.db.get_value("Sales Invoice Item", {"sales_order": so_name}, "parent")
 			if not si_name:
 				continue
 
-			# Skip if Payment Entry already exists
-			if frappe.db.exists("Payment Entry", {"custom_woocommerce_id": wc_order_id}):
+			# Check if Payment Entry already exists for this invoice (using reference_no)
+			if frappe.db.exists("Payment Entry", {"reference_no": wc_order_no}):
 				continue
 
 			# Check if invoice is submitted and unpaid
@@ -66,7 +72,7 @@ def _create_payment_entry(si_doc, wc_order, settings):
 	mode_of_payment, payment_account = _get_payment_mapping(wc_payment_method, settings)
 
 	pe = get_payment_entry("Sales Invoice", si_doc.name)
-	pe.custom_woocommerce_id = str(wc_order.get("id"))
+	# No longer saving custom_woocommerce_id
 
 	if mode_of_payment:
 		pe.mode_of_payment = mode_of_payment

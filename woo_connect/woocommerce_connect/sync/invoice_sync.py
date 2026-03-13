@@ -18,14 +18,15 @@ def sync_invoices_from_woocommerce():
 	for wc_order in orders:
 		try:
 			wc_order_id = str(wc_order.get("id"))
+			wc_order_no = f"WC-{wc_order.get('number', wc_order.get('id'))}"
 
-			# Check if Sales Order exists
-			so_name = frappe.db.get_value("Sales Order", {"custom_woocommerce_id": wc_order_id}, "name")
+			# Check if Sales Order exists by PO No
+			so_name = frappe.db.get_value("Sales Order", {"po_no": wc_order_no}, "name")
 			if not so_name:
 				continue
 
-			# Skip if invoice already created
-			if frappe.db.exists("Sales Invoice", {"custom_woocommerce_id": wc_order_id}):
+			# Skip if invoice already created for this Sales Order
+			if frappe.db.exists("Sales Invoice Item", {"sales_order": so_name}):
 				continue
 
 			# Check if Sales Order is submitted
@@ -33,7 +34,7 @@ def sync_invoices_from_woocommerce():
 			if so_status != 1:
 				continue
 
-			si_name = _create_sales_invoice(so_name, wc_order_id, settings)
+			si_name = _create_sales_invoice(so_name, settings)
 			create_sync_log(
 				sync_type="Invoice",
 				direction="Pull",
@@ -57,12 +58,11 @@ def sync_invoices_from_woocommerce():
 			)
 
 
-def _create_sales_invoice(so_name, wc_order_id, settings):
+def _create_sales_invoice(so_name, settings):
 	"""Create a Sales Invoice from a Sales Order."""
 	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
 	si = make_sales_invoice(so_name)
-	si.custom_woocommerce_id = wc_order_id
 	si.set_posting_time = 1
 	si.flags.ignore_permissions = True
 	si.flags.ignore_mandatory = True

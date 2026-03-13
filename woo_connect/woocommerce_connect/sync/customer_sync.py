@@ -44,12 +44,16 @@ def sync_customers_from_woocommerce():
 
 def _create_or_update_customer(wc_customer, settings):
 	"""Create or update an ERPNext Customer from WooCommerce data."""
+	email = wc_customer.get("email")
 	wc_id = str(wc_customer.get("id"))
-	existing = frappe.db.get_value("Customer", {"custom_woocommerce_id": wc_id}, "name")
+	
+	existing = None
+	if email:
+		existing = _get_customer_by_email(email)
 
 	first_name = wc_customer.get("first_name", "")
 	last_name = wc_customer.get("last_name", "")
-	full_name = f"{first_name} {last_name}".strip() or wc_customer.get("email", f"WC Customer {wc_id}")
+	full_name = f"{first_name} {last_name}".strip() or email or f"WC Customer {wc_id}"
 
 	if existing:
 		customer = frappe.get_doc("Customer", existing)
@@ -62,7 +66,7 @@ def _create_or_update_customer(wc_customer, settings):
 		customer.territory = frappe.db.get_single_value("Selling Settings", "territory") or "All Territories"
 		customer.company = settings.company
 
-	customer.custom_woocommerce_id = wc_id
+	# No longer saving custom_woocommerce_id
 	customer.flags.ignore_permissions = True
 	customer.flags.ignore_mandatory = True
 	customer.save()
@@ -73,15 +77,28 @@ def _create_or_update_customer(wc_customer, settings):
 	# Create or update Address (billing)
 	billing = wc_customer.get("billing", {})
 	if billing and billing.get("address_1"):
-		_create_or_update_address(billing, customer.name, "Billing", wc_id)
+		_create_or_update_address(billing, customer.name, "Billing")
 
 	# Create or update Address (shipping)
 	shipping = wc_customer.get("shipping", {})
 	if shipping and shipping.get("address_1"):
-		_create_or_update_address(shipping, customer.name, "Shipping", wc_id)
+		_create_or_update_address(shipping, customer.name, "Shipping")
 
 	frappe.db.commit()
 	return customer.name
+
+
+def _get_customer_by_email(email):
+	"""Find a customer by email through linked contacts."""
+	contacts = frappe.get_all("Contact", filters={"email_id": email}, fields=["name"])
+	for contact in contacts:
+		links = frappe.get_all("Dynamic Link", 
+			filters={"parent": contact.name, "link_doctype": "Customer"}, 
+			fields=["link_name"]
+		)
+		if links:
+			return links[0].link_name
+	return None
 
 
 def _create_or_update_contact(wc_customer, customer_name):
@@ -123,12 +140,12 @@ def _create_or_update_contact(wc_customer, customer_name):
 	contact.save()
 
 
-def _create_or_update_address(address_data, customer_name, address_type, wc_id):
+def _create_or_update_address(address_data, customer_name, address_type):
 	"""Create or update an Address linked to the Customer."""
+	# Without custom_woocommerce_id, we can only try to find by title or linked customer + type
 	address_title = f"{customer_name}-{address_type}"
-	wc_address_id = f"{wc_id}-{address_type.lower()}"
-
-	existing = frappe.db.get_value("Address", {"custom_woocommerce_id": wc_address_id}, "name")
+	
+	existing = frappe.db.get_value("Address", {"address_title": address_title}, "name")
 
 	if existing:
 		address = frappe.get_doc("Address", existing)
@@ -145,7 +162,6 @@ def _create_or_update_address(address_data, customer_name, address_type, wc_id):
 	address.country = _get_country(address_data.get("country", ""))
 	address.phone = address_data.get("phone", "")
 	address.email_id = address_data.get("email", "")
-	address.custom_woocommerce_id = wc_address_id
 
 	# Link to customer
 	if not any(l.link_doctype == "Customer" and l.link_name == customer_name for l in address.links):

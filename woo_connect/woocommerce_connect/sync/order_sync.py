@@ -21,9 +21,10 @@ def sync_orders_from_woocommerce():
 	for wc_order in orders:
 		try:
 			wc_order_id = str(wc_order.get("id"))
+			wc_order_no = f"WC-{wc_order.get('number', wc_order_id)}"
 
-			# Skip if already synced
-			if frappe.db.exists("Sales Order", {"custom_woocommerce_id": wc_order_id}):
+			# Skip if already synced (using PO No as identifier)
+			if frappe.db.exists("Sales Order", {"po_no": wc_order_no}):
 				continue
 
 			so_name = _create_sales_order(wc_order, settings)
@@ -60,7 +61,7 @@ def _create_sales_order(wc_order, settings):
 	so.company = settings.company
 	so.transaction_date = (wc_order.get("date_created") or "")[:10]
 	so.delivery_date = (wc_order.get("date_created") or "")[:10]
-	so.custom_woocommerce_id = str(wc_order.get("id"))
+	# No longer saving custom_woocommerce_id
 	so.custom_woocommerce_status = wc_order.get("status", "")
 	so.po_no = f"WC-{wc_order.get('number', wc_order.get('id'))}"
 	so.set_warehouse = settings.default_warehouse
@@ -111,18 +112,18 @@ def _create_sales_order(wc_order, settings):
 
 def _get_or_create_customer(wc_order, settings):
 	"""Get or create the customer for a WooCommerce order."""
-	wc_customer_id = str(wc_order.get("customer_id", 0))
-
-	if wc_customer_id and wc_customer_id != "0":
-		existing = frappe.db.get_value("Customer", {"custom_woocommerce_id": wc_customer_id}, "name")
+	billing = wc_order.get("billing", {})
+	email = billing.get("email")
+	
+	if email:
+		existing = _get_customer_by_email(email)
 		if existing:
 			return existing
 
 	# Create guest customer from billing info
-	billing = wc_order.get("billing", {})
 	first_name = billing.get("first_name", "")
 	last_name = billing.get("last_name", "")
-	full_name = f"{first_name} {last_name}".strip() or billing.get("email") or f"WC Guest {wc_order.get('id')}"
+	full_name = f"{first_name} {last_name}".strip() or email or f"WC Guest {wc_order.get('id')}"
 
 	customer = frappe.new_doc("Customer")
 	customer.customer_name = full_name
@@ -131,9 +132,7 @@ def _get_or_create_customer(wc_order, settings):
 	customer.territory = frappe.db.get_single_value("Selling Settings", "territory") or "All Territories"
 	customer.company = settings.company
 
-	if wc_customer_id and wc_customer_id != "0":
-		customer.custom_woocommerce_id = wc_customer_id
-
+	# No longer saving custom_woocommerce_id
 	customer.flags.ignore_permissions = True
 	customer.flags.ignore_mandatory = True
 	customer.save()
@@ -142,17 +141,23 @@ def _get_or_create_customer(wc_order, settings):
 	return customer.name
 
 
+def _get_customer_by_email(email):
+	"""Find a customer by email through linked contacts."""
+	contacts = frappe.get_all("Contact", filters={"email_id": email}, fields=["name"])
+	for contact in contacts:
+		links = frappe.get_all("Dynamic Link", 
+			filters={"parent": contact.name, "link_doctype": "Customer"}, 
+			fields=["link_name"]
+		)
+		if links:
+			return links[0].link_name
+	return None
+
+
 def _get_item_code(line_item, settings):
 	"""Get the ERPNext Item Code for a WooCommerce line item."""
-	wc_product_id = str(line_item.get("product_id", ""))
-
-	# Try to find by WooCommerce ID
-	existing = frappe.db.get_value("Item", {"custom_woocommerce_id": wc_product_id}, "name")
-	if existing:
-		return existing
-
-	# Try by SKU
 	sku = line_item.get("sku")
+	
 	if sku:
 		existing = frappe.db.get_value("Item", {"item_code": sku}, "name")
 		if existing:
@@ -160,12 +165,12 @@ def _get_item_code(line_item, settings):
 
 	# Create a new item
 	item = frappe.new_doc("Item")
-	item.item_code = sku or f"WC-{wc_product_id}"
-	item.item_name = line_item.get("name", f"WC Product {wc_product_id}")
+	item.item_code = sku or f"WC-{line_item.get('product_id')}"
+	item.item_name = line_item.get("name", f"WC Product {line_item.get('product_id')}")
 	item.item_group = settings.default_item_group or "All Item Groups"
 	item.stock_uom = settings.default_uom or "Nos"
 	item.is_stock_item = 1
-	item.custom_woocommerce_id = wc_product_id
+	# No longer saving custom_woocommerce_id
 	item.custom_woocommerce_sync = 1
 	item.flags.ignore_permissions = True
 	item.save()

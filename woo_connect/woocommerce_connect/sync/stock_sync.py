@@ -15,11 +15,11 @@ def sync_stock_to_woocommerce():
 
 	api = get_wc_api(settings)
 
-	# Get all items with WooCommerce IDs
+	# Get all items marked for WooCommerce sync
 	items = frappe.get_all(
 		"Item",
-		filters={"custom_woocommerce_id": ["is", "set"]},
-		fields=["name", "item_name", "custom_woocommerce_id"],
+		filters={"custom_woocommerce_sync": 1},
+		fields=["name", "item_name", "item_code"],
 	)
 
 	for item in items:
@@ -32,14 +32,18 @@ def sync_stock_to_woocommerce():
 				"manage_stock": True,
 			}
 
-			response = api.put(f"products/{item.custom_woocommerce_id}", product_data)
+			wc_id = _get_wc_id_by_sku(api, item.item_code)
+			if not wc_id:
+				continue
+
+			response = api.put(f"products/{wc_id}", product_data)
 
 			if response.status_code == 200:
 				create_sync_log(
 					sync_type="Stock",
 					direction="Push",
 					status="Success",
-					wc_id=item.custom_woocommerce_id,
+					wc_id=wc_id,
 					erpnext_doctype="Item",
 					erpnext_docname=item.name,
 					message=f"Stock updated: {item.item_name} → {int(qty)}",
@@ -49,7 +53,7 @@ def sync_stock_to_woocommerce():
 					sync_type="Stock",
 					direction="Push",
 					status="Failed",
-					wc_id=item.custom_woocommerce_id,
+					wc_id=wc_id,
 					erpnext_doctype="Item",
 					erpnext_docname=item.name,
 					message=f"API Error: {response.status_code}",
@@ -60,7 +64,6 @@ def sync_stock_to_woocommerce():
 				sync_type="Stock",
 				direction="Push",
 				status="Failed",
-				wc_id=item.custom_woocommerce_id,
 				erpnext_doctype="Item",
 				erpnext_docname=item.name,
 				message=str(e),
@@ -69,6 +72,18 @@ def sync_stock_to_woocommerce():
 				title=f"WC Stock Sync Error: {item.item_name}",
 				message=frappe.get_traceback(),
 			)
+
+
+def _get_wc_id_by_sku(api, sku):
+	"""Search WooCommerce for a product ID by its SKU."""
+	if not sku:
+		return None
+	response = api.get("products", params={"sku": sku})
+	if response.status_code == 200:
+		products = response.json()
+		if products:
+			return products[0].get("id")
+	return None
 
 
 def _get_stock_qty(item_code, warehouse):

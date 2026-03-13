@@ -9,12 +9,7 @@ from woo_connect.woocommerce_connect.utils.api_client import create_sync_log, ge
 
 
 def sync_loyalty_points_from_woocommerce():
-	"""Pull loyalty points data from WooCommerce and create Loyalty Point Entries in ERPNext.
-
-	This works with WooCommerce loyalty/points plugins that expose
-	customer point balances through the WC REST API customers endpoint
-	meta_data or through a custom endpoint.
-	"""
+	"""Pull loyalty points data from WooCommerce and create Loyalty Point Entries in ERPNext."""
 	settings = frappe.get_single("WooCommerce Server")
 	if not settings.enabled or not settings.enable_loyalty_points or not settings.loyalty_program:
 		return
@@ -23,8 +18,12 @@ def sync_loyalty_points_from_woocommerce():
 
 	for wc_customer in customers:
 		try:
+			email = wc_customer.get("email")
 			wc_id = str(wc_customer.get("id"))
-			customer_name = frappe.db.get_value("Customer", {"custom_woocommerce_id": wc_id}, "name")
+			
+			customer_name = None
+			if email:
+				customer_name = _get_customer_by_email(email)
 
 			if not customer_name:
 				continue
@@ -59,11 +58,21 @@ def sync_loyalty_points_from_woocommerce():
 			)
 
 
-def _get_loyalty_points_from_meta(wc_customer):
-	"""Extract loyalty points from WooCommerce customer meta_data.
+def _get_customer_by_email(email):
+	"""Find a customer by email through linked contacts."""
+	contacts = frappe.get_all("Contact", filters={"email_id": email}, fields=["name"])
+	for contact in contacts:
+		links = frappe.get_all("Dynamic Link", 
+			filters={"parent": contact.name, "link_doctype": "Customer"}, 
+			fields=["link_name"]
+		)
+		if links:
+			return links[0].link_name
+	return None
 
-	Supports common WC loyalty plugins that store points in customer meta.
-	"""
+
+def _get_loyalty_points_from_meta(wc_customer):
+	"""Extract loyalty points from WooCommerce customer meta_data."""
 	meta_data = wc_customer.get("meta_data", [])
 	loyalty_keys = (
 		"wc_points_balance",

@@ -7,7 +7,7 @@
         "label": "Delivery Provider",
         "fieldname": "custom_delivery_provider",
         "fieldtype": "Link",
-        "insert_after": "custom_woocommerce_id",
+        "insert_after": "",
         "options": "Delivery Service Provider",
         "read_only": 1,
         "no_copy": 1,

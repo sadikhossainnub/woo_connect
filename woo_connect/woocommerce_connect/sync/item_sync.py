@@ -21,14 +21,14 @@ def sync_items_from_woocommerce():
 
 	for product in products:
 		try:
-			_create_or_update_item(product, settings)
+			item_name = _create_or_update_item(product, settings)
 			create_sync_log(
 				sync_type="Item",
 				direction="Pull",
 				status="Success",
 				wc_id=product.get("id"),
 				erpnext_doctype="Item",
-				erpnext_docname=_get_item_name_by_wc_id(product.get("id")),
+				erpnext_docname=item_name,
 				message=f"Synced product: {product.get('name')}",
 			)
 		except Exception as e:
@@ -58,24 +58,26 @@ def sync_items_to_woocommerce():
 	items = frappe.get_all(
 		"Item",
 		filters={"custom_woocommerce_sync": 1},
-		fields=["name", "item_name", "description", "standard_rate", "weight_per_unit", "custom_woocommerce_id"],
+		fields=["name", "item_name", "description", "standard_rate", "weight_per_unit"],
 	)
 
 	for item in items:
 		try:
 			item_doc = frappe.get_doc("Item", item.name)
 			product_data = _prepare_product_data(item_doc, settings)
+			
+			wc_id = _get_wc_id_by_sku(api, item_doc.item_code)
 
-			if item.custom_woocommerce_id:
+			if wc_id:
 				# Update existing product
-				response = api.put(f"products/{item.custom_woocommerce_id}", product_data)
+				response = api.put(f"products/{wc_id}", product_data)
 			else:
 				# Create new product
 				response = api.post("products", product_data)
 
 			if response.status_code in (200, 201):
 				wc_product = response.json()
-				frappe.db.set_value("Item", item.name, "custom_woocommerce_id", str(wc_product.get("id")))
+				# We no longer save the ID to custom_woocommerce_id
 				frappe.db.commit()
 
 				create_sync_log(
@@ -110,6 +112,7 @@ def sync_items_to_woocommerce():
 				title=f"WC Item Push Error: {item.item_name}",
 				message=frappe.get_traceback(),
 			)
+
 @frappe.whitelist()
 def push_item_to_woocommerce(item_name):
 	"""Push a single Item from ERPNext to WooCommerce."""
@@ -122,16 +125,19 @@ def push_item_to_woocommerce(item_name):
 	product_data = _prepare_product_data(item_doc, settings)
 
 	try:
-		if item_doc.custom_woocommerce_id:
+		wc_id = _get_wc_id_by_sku(api, item_doc.item_code)
+
+		if wc_id:
 			# Update existing product
-			response = api.put(f"products/{item_doc.custom_woocommerce_id}", product_data)
+			response = api.put(f"products/{wc_id}", product_data)
 		else:
 			# Create new product
 			response = api.post("products", product_data)
 
 		if response.status_code in (200, 201):
 			wc_product = response.json()
-			item_doc.db_set("custom_woocommerce_id", str(wc_product.get("id")))
+			# No longer saving the ID to custom_woocommerce_id
+			# Just mark for sync
 			item_doc.db_set("custom_woocommerce_sync", 1)
 
 			create_sync_log(
@@ -176,20 +182,28 @@ def push_item_to_woocommerce(item_name):
 def _create_or_update_item(product, settings):
 	"""Create or update an ERPNext Item from a WooCommerce product."""
 	wc_id = str(product.get("id"))
-	existing_item = _get_item_name_by_wc_id(wc_id)
+	sku = product.get("sku")
+	
+	existing_item = None
+	if sku:
+		existing_item = frappe.db.get_value("Item", {"item_code": sku}, "name")
+	
+	if not existing_item:
+		# Fallback to name if SKU is empty but name matches? 
+		# No, best to match by item_code which should be SKU
+		pass
 
 	if existing_item:
 		item = frappe.get_doc("Item", existing_item)
 	else:
 		item = frappe.new_doc("Item")
-		item.item_code = product.get("sku") or f"WC-{wc_id}"
+		item.item_code = sku or f"WC-{wc_id}"
 		item.item_group = _resolve_item_group(product, settings)
 		item.stock_uom = settings.default_uom or "Nos"
 		item.is_stock_item = 1 if product.get("manage_stock") else 0
 
 	item.item_name = product.get("name")
 	item.description = product.get("description") or product.get("short_description") or product.get("name")
-	item.custom_woocommerce_id = wc_id
 	item.custom_woocommerce_sync = 1
 
 	if product.get("weight"):
@@ -219,17 +233,18 @@ def push_item_group_to_woocommerce(item_group_name):
 	category_data = _prepare_category_data(item_group_doc, settings)
 
 	try:
-		if item_group_doc.custom_woocommerce_id:
+		wc_id = _get_wc_category_id_by_name(api, item_group_name)
+
+		if wc_id:
 			# Update existing category
-			response = api.put(f"products/categories/{item_group_doc.custom_woocommerce_id}", category_data)
+			response = api.put(f"products/categories/{wc_id}", category_data)
 		else:
 			# Create new category
 			response = api.post("products/categories", category_data)
 
 		if response.status_code in (200, 201):
 			wc_category = response.json()
-			item_group_doc.db_set("custom_woocommerce_id", str(wc_category.get("id")))
-
+			
 			# Add to mapping if not exists
 			_update_category_mapping(settings, str(wc_category.get("id")), item_group_name)
 
@@ -279,8 +294,11 @@ def _prepare_category_data(item_group_doc, settings):
 		"description": item_group_doc.description or "",
 	}
 
+	# Parent category matching is tricky without IDs. 
+	# We'd have to search for the parent ID in WC by name.
 	if item_group_doc.parent_item_group:
-		parent_wc_id = frappe.db.get_value("Item Group", item_group_doc.parent_item_group, "custom_woocommerce_id")
+		api = get_wc_api(settings)
+		parent_wc_id = _get_wc_category_id_by_name(api, item_group_doc.parent_item_group)
 		if parent_wc_id:
 			data["parent"] = int(parent_wc_id)
 
@@ -291,8 +309,8 @@ def _update_category_mapping(settings, wc_id, item_group):
 	"""Update category mappings table in settings."""
 	found = False
 	for mapping in settings.category_mappings:
-		if mapping.wc_category_id == wc_id:
-			mapping.item_group = item_group
+		if mapping.item_group == item_group:
+			mapping.wc_category_id = wc_id
 			found = True
 			break
 	
@@ -306,11 +324,31 @@ def _update_category_mapping(settings, wc_id, item_group):
 	settings.save(ignore_permissions=True)
 
 
-def _get_item_name_by_wc_id(wc_id):
-	"""Get Item name by WooCommerce ID."""
-	if not wc_id:
+def _get_wc_id_by_sku(api, sku):
+	"""Search WooCommerce for a product ID by its SKU."""
+	if not sku:
 		return None
-	return frappe.db.get_value("Item", {"custom_woocommerce_id": str(wc_id)}, "name")
+	response = api.get("products", params={"sku": sku})
+	if response.status_code == 200:
+		products = response.json()
+		if products:
+			return products[0].get("id")
+	return None
+
+
+def _get_wc_category_id_by_name(api, name):
+	"""Search WooCommerce for a category ID by its name."""
+	if not name:
+		return None
+	# WooCommerce API doesn't support direct filtering by name for categories easily in one call,
+	# but we can try searching.
+	response = api.get("products/categories", params={"search": name})
+	if response.status_code == 200:
+		categories = response.json()
+		for cat in categories:
+			if cat.get("name") == name:
+				return cat.get("id")
+	return None
 
 
 def _prepare_product_data(item_doc, settings):
@@ -323,7 +361,7 @@ def _prepare_product_data(item_doc, settings):
 		"manage_stock": bool(item_doc.is_stock_item),
 	}
 
-	if item_doc.weight_per_unit:
+	if item_doc.get("weight_per_unit"):
 		data["weight"] = str(item_doc.weight_per_unit)
 
 	# Get price
@@ -359,10 +397,7 @@ def _set_item_price(item_code, price, price_list):
 
 
 def _resolve_item_group(product, settings):
-	"""Resolve the ERPNext Item Group from WooCommerce product categories.
-
-	Uses the category mapping table in settings. Falls back to default_item_group.
-	"""
+	"""Resolve the ERPNext Item Group from WooCommerce product categories."""
 	categories = product.get("categories", [])
 	if not categories:
 		return settings.default_item_group or "All Item Groups"
