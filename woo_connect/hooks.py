@@ -100,6 +100,8 @@ fixtures = [
 # ----------
 doctype_js = {
 	"Sales Invoice": "delivery_management/client_scripts/sales_invoice.js",
+	"Item": "woocommerce_connect/client_scripts/item.js",
+	"Item Group": "woocommerce_connect/client_scripts/item_group.js",
 }
 
 # Uninstallation

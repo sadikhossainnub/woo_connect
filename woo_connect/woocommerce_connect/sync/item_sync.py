@@ -110,6 +110,67 @@ def sync_items_to_woocommerce():
 				title=f"WC Item Push Error: {item.item_name}",
 				message=frappe.get_traceback(),
 			)
+@frappe.whitelist()
+def push_item_to_woocommerce(item_name):
+	"""Push a single Item from ERPNext to WooCommerce."""
+	settings = frappe.get_single("WooCommerce Server")
+	if not settings.enabled:
+		frappe.throw("WooCommerce integration is disabled")
+
+	api = get_wc_api(settings)
+	item_doc = frappe.get_doc("Item", item_name)
+	product_data = _prepare_product_data(item_doc, settings)
+
+	try:
+		if item_doc.custom_woocommerce_id:
+			# Update existing product
+			response = api.put(f"products/{item_doc.custom_woocommerce_id}", product_data)
+		else:
+			# Create new product
+			response = api.post("products", product_data)
+
+		if response.status_code in (200, 201):
+			wc_product = response.json()
+			item_doc.db_set("custom_woocommerce_id", str(wc_product.get("id")))
+			item_doc.db_set("custom_woocommerce_sync", 1)
+
+			create_sync_log(
+				sync_type="Item",
+				direction="Push",
+				status="Success",
+				wc_id=wc_product.get("id"),
+				erpnext_doctype="Item",
+				erpnext_docname=item_name,
+				message=f"Pushed item: {item_doc.item_name}",
+			)
+			return {"status": "Success", "message": f"Item {item_name} pushed to WooCommerce"}
+		else:
+			error_msg = f"API Error: {response.status_code}"
+			response_data = response.json() if response.text else None
+			create_sync_log(
+				sync_type="Item",
+				direction="Push",
+				status="Failed",
+				erpnext_doctype="Item",
+				erpnext_docname=item_name,
+				message=error_msg,
+				response_data=response_data,
+			)
+			frappe.throw(f"Failed to push item to WooCommerce: {error_msg}")
+	except Exception as e:
+		create_sync_log(
+			sync_type="Item",
+			direction="Push",
+			status="Failed",
+			erpnext_doctype="Item",
+			erpnext_docname=item_name,
+			message=str(e),
+		)
+		frappe.log_error(
+			title=f"WC Item Push Error: {item_doc.item_name}",
+			message=frappe.get_traceback(),
+		)
+		frappe.throw(f"Failed to push item to WooCommerce: {e}")
 
 
 def _create_or_update_item(product, settings):
@@ -144,6 +205,105 @@ def _create_or_update_item(product, settings):
 
 	frappe.db.commit()
 	return item.name
+
+
+@frappe.whitelist()
+def push_item_group_to_woocommerce(item_group_name):
+	"""Push a single Item Group from ERPNext to WooCommerce as a category."""
+	settings = frappe.get_single("WooCommerce Server")
+	if not settings.enabled:
+		frappe.throw("WooCommerce integration is disabled")
+
+	api = get_wc_api(settings)
+	item_group_doc = frappe.get_doc("Item Group", item_group_name)
+	category_data = _prepare_category_data(item_group_doc, settings)
+
+	try:
+		if item_group_doc.custom_woocommerce_id:
+			# Update existing category
+			response = api.put(f"products/categories/{item_group_doc.custom_woocommerce_id}", category_data)
+		else:
+			# Create new category
+			response = api.post("products/categories", category_data)
+
+		if response.status_code in (200, 201):
+			wc_category = response.json()
+			item_group_doc.db_set("custom_woocommerce_id", str(wc_category.get("id")))
+
+			# Add to mapping if not exists
+			_update_category_mapping(settings, str(wc_category.get("id")), item_group_name)
+
+			create_sync_log(
+				sync_type="Item",
+				direction="Push",
+				status="Success",
+				wc_id=wc_category.get("id"),
+				erpnext_doctype="Item Group",
+				erpnext_docname=item_group_name,
+				message=f"Pushed item group: {item_group_name}",
+			)
+			return {"status": "Success", "message": f"Item Group {item_group_name} pushed to WooCommerce"}
+		else:
+			error_msg = f"API Error: {response.status_code}"
+			response_data = response.json() if response.text else None
+			create_sync_log(
+				sync_type="Item",
+				direction="Push",
+				status="Failed",
+				erpnext_doctype="Item Group",
+				erpnext_docname=item_group_name,
+				message=error_msg,
+				response_data=response_data,
+			)
+			frappe.throw(f"Failed to push item group to WooCommerce: {error_msg}")
+	except Exception as e:
+		create_sync_log(
+			sync_type="Item",
+			direction="Push",
+			status="Failed",
+			erpnext_doctype="Item Group",
+			erpnext_docname=item_group_name,
+			message=str(e),
+		)
+		frappe.log_error(
+			title=f"WC Item Group Push Error: {item_group_name}",
+			message=frappe.get_traceback(),
+		)
+		frappe.throw(f"Failed to push item group to WooCommerce: {e}")
+
+
+def _prepare_category_data(item_group_doc, settings):
+	"""Convert ERPNext Item Group to WooCommerce category data."""
+	data = {
+		"name": item_group_doc.item_group_name,
+		"description": item_group_doc.description or "",
+	}
+
+	if item_group_doc.parent_item_group:
+		parent_wc_id = frappe.db.get_value("Item Group", item_group_doc.parent_item_group, "custom_woocommerce_id")
+		if parent_wc_id:
+			data["parent"] = int(parent_wc_id)
+
+	return data
+
+
+def _update_category_mapping(settings, wc_id, item_group):
+	"""Update category mappings table in settings."""
+	found = False
+	for mapping in settings.category_mappings:
+		if mapping.wc_category_id == wc_id:
+			mapping.item_group = item_group
+			found = True
+			break
+	
+	if not found:
+		settings.append("category_mappings", {
+			"wc_category_id": wc_id,
+			"wc_category_name": item_group,
+			"item_group": item_group
+		})
+	
+	settings.save(ignore_permissions=True)
 
 
 def _get_item_name_by_wc_id(wc_id):
