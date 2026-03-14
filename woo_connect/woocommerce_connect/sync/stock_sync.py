@@ -18,7 +18,6 @@ def sync_stock_to_woocommerce():
 	# Get all items marked for WooCommerce sync
 	items = frappe.get_all(
 		"Item",
-		filters={"custom_woocommerce_sync": 1},
 		fields=["name", "item_name", "item_code"],
 	)
 

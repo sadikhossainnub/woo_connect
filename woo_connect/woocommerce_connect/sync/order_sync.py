@@ -62,7 +62,6 @@ def _create_sales_order(wc_order, settings):
 	so.transaction_date = (wc_order.get("date_created") or "")[:10]
 	so.delivery_date = (wc_order.get("date_created") or "")[:10]
 	# No longer saving custom_woocommerce_id
-	so.custom_woocommerce_status = wc_order.get("status", "")
 	so.po_no = f"WC-{wc_order.get('number', wc_order.get('id'))}"
 	so.set_warehouse = settings.default_warehouse
 
@@ -171,7 +170,6 @@ def _get_item_code(line_item, settings):
 	item.stock_uom = settings.default_uom or "Nos"
 	item.is_stock_item = 1
 	# No longer saving custom_woocommerce_id
-	item.custom_woocommerce_sync = 1
 	item.flags.ignore_permissions = True
 	item.save()
 	frappe.db.commit()

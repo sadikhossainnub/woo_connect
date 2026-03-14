@@ -57,7 +57,6 @@ def sync_items_to_woocommerce():
 	# Get items marked for WooCommerce sync
 	items = frappe.get_all(
 		"Item",
-		filters={"custom_woocommerce_sync": 1},
 		fields=["name", "item_name", "description", "standard_rate", "weight_per_unit"],
 	)
 
@@ -138,7 +137,6 @@ def push_item_to_woocommerce(item_name):
 			wc_product = response.json()
 			# No longer saving the ID to custom_woocommerce_id
 			# Just mark for sync
-			item_doc.db_set("custom_woocommerce_sync", 1)
 
 			create_sync_log(
 				sync_type="Item",
@@ -204,7 +202,6 @@ def _create_or_update_item(product, settings):
 
 	item.item_name = product.get("name")
 	item.description = product.get("description") or product.get("short_description") or product.get("name")
-	item.custom_woocommerce_sync = 1
 
 	if product.get("weight"):
 		item.weight_per_unit = float(product.get("weight"))
