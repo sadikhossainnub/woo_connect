@@ -87,7 +87,7 @@ required_apps = ["frappe", "erpnext"]
 # ------------
 
 # before_install = "woo_connect.install.before_install"
-# after_install = "woo_connect.install.after_install"
+after_install = "woo_connect.setup.after_install"
 
 # Fixtures
 # --------
