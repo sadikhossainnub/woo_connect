@@ -371,6 +371,12 @@ def _prepare_product_data(item_doc, settings):
 		if price:
 			data["regular_price"] = str(price)
 
+	# Include item image
+	if item_doc.get("image"):
+		from frappe.utils import get_url
+		image_url = get_url(item_doc.image)
+		data["images"] = [{"src": image_url}]
+
 	return data
 
 

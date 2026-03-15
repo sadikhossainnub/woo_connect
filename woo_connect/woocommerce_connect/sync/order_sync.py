@@ -59,8 +59,11 @@ def _create_sales_order(wc_order, settings):
 	so = frappe.new_doc("Sales Order")
 	so.customer = customer_name
 	so.company = settings.company
-	so.transaction_date = (wc_order.get("date_created") or "")[:10]
-	so.delivery_date = (wc_order.get("date_created") or "")[:10]
+	from frappe.utils import add_days
+	
+	transaction_date = (wc_order.get("date_created") or "")[:10]
+	so.transaction_date = transaction_date
+	so.delivery_date = add_days(transaction_date, 3) if transaction_date else None
 	# No longer saving custom_woocommerce_id
 	so.po_no = f"WC-{wc_order.get('number', wc_order.get('id'))}"
 	so.set_warehouse = settings.default_warehouse
@@ -76,7 +79,7 @@ def _create_sales_order(wc_order, settings):
 			"qty": line_item.get("quantity", 1),
 			"rate": float(line_item.get("price", 0)),
 			"warehouse": settings.default_warehouse,
-			"delivery_date": (wc_order.get("date_created") or "")[:10],
+			"delivery_date": so.delivery_date,
 		})
 
 	# Add shipping as a line item if applicable
@@ -88,7 +91,7 @@ def _create_sales_order(wc_order, settings):
 			"qty": 1,
 			"rate": shipping_total,
 			"warehouse": settings.default_warehouse,
-			"delivery_date": (wc_order.get("date_created") or "")[:10],
+			"delivery_date": so.delivery_date,
 		})
 
 	# Apply taxes

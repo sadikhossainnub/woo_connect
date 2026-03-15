@@ -87,10 +87,14 @@ class WooCommerceServer(Document):
 	@frappe.whitelist()
 	def run_sync_items(self):
 		"""Manually trigger item sync."""
-		from woo_connect.woocommerce_connect.sync.item_sync import sync_items_from_woocommerce
+		from woo_connect.woocommerce_connect.sync.item_sync import (
+			sync_items_from_woocommerce,
+			sync_items_to_woocommerce,
+		)
 
 		frappe.enqueue(sync_items_from_woocommerce, queue="long", timeout=1500)
-		frappe.msgprint("Item sync has been queued.", indicator="blue", alert=True)
+		frappe.enqueue(sync_items_to_woocommerce, queue="long", timeout=1500)
+		frappe.msgprint("Item sync (Pull & Push) has been queued.", indicator="blue", alert=True)
 
 	@frappe.whitelist()
 	def run_sync_customers(self):
